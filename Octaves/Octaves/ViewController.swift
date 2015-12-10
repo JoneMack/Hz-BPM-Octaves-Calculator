@@ -67,7 +67,17 @@ class ViewController: UIViewController, UITextFieldDelegate, UIPickerViewDataSou
         NSNotificationCenter.defaultCenter().removeObserver(self)
     }
     
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if segue.identifier == "info" {
+            segue.destinationViewController.view.backgroundColor = UIColor(hue: hue, saturation: 1.0, brightness: 0.4, alpha: 1.0)
+        }
+    }
+    
     //MARK:- ViewController
+    
+    @IBAction func unwindToMainViewController(segue: UIStoryboardSegue) {
+        // This empty function is needed for Interface Builder.
+    }
     
     func populateCentsOffsetOptionsArray() {
         for i in -50...50 {
