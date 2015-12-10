@@ -1,0 +1,30 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "0BF34CB18B6402E8127D5B24947A8D126845F07B",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "D5377F91051F2B448FB5E5D16D8510484CEB9A4B" : 0,
+    "0BF34CB18B6402E8127D5B24947A8D126845F07B" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "A15DBD1D-34AD-444E-909A-4D705197851E",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "D5377F91051F2B448FB5E5D16D8510484CEB9A4B" : "audio",
+    "0BF34CB18B6402E8127D5B24947A8D126845F07B" : "Hz-BPM-Octaves-Calculator\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "Octaves",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "Octaves\/Octaves.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/262hz\/Hz-BPM-Octaves-Calculator.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "0BF34CB18B6402E8127D5B24947A8D126845F07B"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/262hz\/audio.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "D5377F91051F2B448FB5E5D16D8510484CEB9A4B"
+    }
+  ]
+}
