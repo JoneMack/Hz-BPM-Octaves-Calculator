@@ -10,6 +10,9 @@ import UIKit
 
 class ViewController: UIViewController, UITextFieldDelegate, UIPickerViewDataSource, UIPickerViewDelegate {
     
+    //FIXME: this code contains a hack. sorry, not sorry. change to false if you want to be proper and avoid hacks.
+    let shouldUseHackForDarkPickerView = true
+    
     let hue: CGFloat = 0.5 // Choose a value between 0 and 1 to determine color scheme of UI.
     
     var noteNamePickerView: UIPickerView!
@@ -17,7 +20,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIPickerViewDataSou
     
     var noteNames: [String] = ["C", "C♯", "D♭", "D", "D♯", "E♭", "E", "F", "F♯", "G♭", "G", "G♯", "A♭", "A", "A♯", "B♭", "B"]
     var centsOffsetOptions: [Int] = []
-    var indexOfZeroCents: Int!
+    var indexOfZeroCents = 50 // This number is calculated later.
     
     let hzUserDefaultKey = "hz"
 
@@ -69,7 +72,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIPickerViewDataSou
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if segue.identifier == "info" {
-            segue.destinationViewController.view.backgroundColor = UIColor(hue: hue, saturation: 1.0, brightness: 0.4, alpha: 1.0)
+            segue.destinationViewController.view.backgroundColor = UIColor(hue: hue, saturation: 1.0, brightness: 0.27, alpha: 1.0)
         }
     }
     
@@ -84,7 +87,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIPickerViewDataSou
             centsOffsetOptions.append(i)
         }
         
-        indexOfZeroCents = centsOffsetOptions.indexOf(0)
+        indexOfZeroCents = centsOffsetOptions.indexOf(0)!
     }
     
     /**
@@ -188,10 +191,10 @@ class ViewController: UIViewController, UITextFieldDelegate, UIPickerViewDataSou
         let hzOneDown = hz/2
         let hzTwoDown = hz/4
         
-        hzOneUpLabel.text = hzOneUp.string()
-        hzTwoUpLabel.text = hzTwoUp.string()
-        hzOneDownLabel.text = hzOneDown.string()
-        hzTwoDownLabel.text = hzTwoDown.string()
+        hzOneUpLabel.text = (hzOneUp == 0) ? "" : hzOneUp.string()
+        hzTwoUpLabel.text = (hzTwoUp == 0) ? "" : hzTwoUp.string()
+        hzOneDownLabel.text = (hzOneDown == 0) ? "" : hzOneDown.string()
+        hzTwoDownLabel.text = (hzTwoDown == 0) ? "" : hzTwoDown.string()
         
         saveHzInUserDefaults(hz)
     }
@@ -210,7 +213,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIPickerViewDataSou
         let savedHz = userDefaults.valueForKey(hzUserDefaultKey)
         
         if let savedHz = savedHz as? Double {
-            hzTextField.text = savedHz.string()
+            hzTextField.text = (savedHz == 0) ? "" : savedHz.string()
             calculateForHz(savedHz)
         }
     }
@@ -241,16 +244,20 @@ class ViewController: UIViewController, UITextFieldDelegate, UIPickerViewDataSou
         let bpmOneDown = bpm/2
         let bpmTwoDown = bpm/4
         
-        bpmOneUpLabel.text = bpmOneUp.string()
-        bpmTwoUpLabel.text = bpmTwoUp.string()
-        bpmOneDownLabel.text = bpmOneDown.string()
-        bpmTwoDownLabel.text = bpmTwoDown.string()
+        bpmOneUpLabel.text = (bpmOneUp == 0) ? "" : bpmOneUp.string()
+        bpmTwoUpLabel.text = (bpmTwoUp == 0) ? "" : bpmTwoUp.string()
+        bpmOneDownLabel.text = (bpmOneDown == 0) ? "" : bpmOneDown.string()
+        bpmTwoDownLabel.text = (bpmTwoDown == 0) ? "" : bpmTwoDown.string()
     }
     
     func updateForNoteName(noteName: String, shouldModifyNoteNamePickerView: Bool, centsOffSet: Double, shouldMofifyCentsOffsetPickerView: Bool) {
         if noteName == "" {
             noteNameTextField.text = ""
             centsOffsetTextField.text = ""
+            
+            noteNamePickerView.selectRow(0, inComponent: 0, animated: false)
+            centsOffsetPickerView.selectRow(indexOfZeroCents, inComponent: 0, animated: false)
+            
             return // If note name is blank, no sense in proceeding with calculations.
         }
         
@@ -311,6 +318,23 @@ class ViewController: UIViewController, UITextFieldDelegate, UIPickerViewDataSou
             }, completion: nil);
     }
     
+    func removeKeyboardBackground() {
+        //NOTE: this function contains a hack.
+        for window in UIApplication.sharedApplication().windows {
+            for possibleFormView in window.subviews {
+                if possibleFormView.description.hasPrefix("<UIInputSetContainerView") {
+                    for peripheralView in possibleFormView.subviews {
+                        for possiblePickerView in peripheralView.subviews {
+                            if let pickerView = possiblePickerView as? UIPickerView {
+                                pickerView.backgroundColor = UIColor.clearColor()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
     @IBAction func centsOffsetDoubleTapped() {
         // Reset cents offset to 0 when double tapped.
         let noteNameIndex = noteNamePickerView.selectedRowInComponent(0)
@@ -334,8 +358,6 @@ class ViewController: UIViewController, UITextFieldDelegate, UIPickerViewDataSou
     
     func textField(textField: UITextField, shouldChangeCharactersInRange range: NSRange, replacementString string: String) -> Bool {
         if textField == hzTextField || textField == bpmTextField {
-            print("range \(range) and replacementString \(string)")
-            
             //sanity check http://stackoverflow.com/questions/433337/set-the-maximum-character-length-of-a-uitextfield
             if (range.length + range.location > textField.text!.characters.count) {
                 return false
@@ -354,22 +376,22 @@ class ViewController: UIViewController, UITextFieldDelegate, UIPickerViewDataSou
             for char in proposedString.characters {
                 if char == "." {
                     if index == 0 {
-                        print("don't allow dot as first char")
+                        // don't allow dot as first char
                         return false
                     }
                     
                     dotCount++
                     
                     if dotCount > 1 {
-                        print("too many dots")
+                        // too many dots
                         return false
                     }
                 } else {
-                    //number, not dot
+                    // number, not dot
                     if dotCount == 0 {
                         numberLeftCount++
                         if numberLeftCount > leftNumberLimit {
-                            //limit reached for numbers left of dot
+                            // limit reached for numbers left of dot
                             return false
                         }
                     } else {
@@ -414,25 +436,15 @@ class ViewController: UIViewController, UITextFieldDelegate, UIPickerViewDataSou
     
     //MARK:- UIPickerViewDelegate
     
-    func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-        if pickerView == noteNamePickerView {
-            return noteNames[row]
-        } else if pickerView == centsOffsetPickerView {
-            let centsOffset = centsOffsetOptions[row]
-            if centsOffset >= 0 {
-                return "+" + String(centsOffsetOptions[row])
-            } else {
-                return String(centsOffsetOptions[row])
-            }
+    func pickerView(pickerView: UIPickerView, viewForRow row: Int, forComponent component: Int, reusingView view: UIView?) -> UIView {
+        
+        if shouldUseHackForDarkPickerView {
+            self.removeKeyboardBackground()
         }
         
-        preconditionFailure("Unable to determine title in unknown picker view: \(pickerView)")
-    }
-    
-    func pickerView(pickerView: UIPickerView, viewForRow row: Int, forComponent component: Int, reusingView view: UIView?) -> UIView {
         let label = UILabel(frame: CGRect(x: 0, y: 0, width: pickerView.frame.width, height: 44))
         label.backgroundColor = UIColor.clearColor()
-        label.textColor = UIColor.blackColor()
+        label.textColor = shouldUseHackForDarkPickerView ? UIColor.whiteColor() : UIColor.blackColor()
         label.font = UIFont.boldSystemFontOfSize(20)
         label.textAlignment = NSTextAlignment.Center
         
